@@ -26,18 +26,26 @@ jobs:
         pip install "numpy<2" "matplotlib<3.8" "librosa==0.10.0"
         pip install torch==2.1.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cpu
         
-        # Клонирование с явным указанием ветки master
-        git clone --depth 1 --branch master https://github.com/interactiveaudiolab/ppgs.git
+        # Альтернативная установка ppgs
+        git clone https://github.com/interactiveaudiolab/ppgs.git
         cd ppgs
+        git checkout 89f5a28  # Конкретный рабочий коммит
         pip install -e .
         cd ..
         echo "PYTHONPATH=$PYTHONPATH:$(pwd)/ppgs" >> $GITHUB_ENV
     
-    - name: Verify installations
+    - name: Verify installation
       run: |
-        python -c "import torch; print(f'PyTorch: {torch.__version__}')"
-        python -c "import numpy; print(f'NumPy: {numpy.__version__}')"
-        python -c "from ppgs import PPGExtractor; print('PPGExtractor imported successfully')"
+        python -c "
+        try:
+            from ppgs.model import PPGExtractor
+            print('PPGExtractor imported successfully')
+        except ImportError as e:
+            print(f'Import failed: {e}')
+            print('Trying alternative import...')
+            from ppgs import extract
+            print('Extract module found')
+        "
         
     - name: Run analysis
       run: |

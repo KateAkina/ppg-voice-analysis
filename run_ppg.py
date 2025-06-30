@@ -1,63 +1,72 @@
+import os
+import sys
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
-import os
-import sys
 from ppgs import PPGExtractor
 
-def main():
+def check_audio_file(path):
+    if not os.path.exists(path):
+        print(f"Error: Audio file {path} not found!", file=sys.stderr)
+        return False
+    return True
+
+def download_model(url, path):
     try:
-        print("Starting PPG analysis...")
-        
-        # Config
-        config = {
-            "model_url": "https://github.com/interactiveaudiolab/ppgs/releases/download/v1.0/model.pth",
-            "audio_path": "sample.wav",
-            "output_dir": "results"
-        }
+        import urllib.request
+        print(f"Downloading model from {url}...")
+        urllib.request.urlretrieve(url, path)
+        return True
+    except Exception as e:
+        print(f"Model download failed: {str(e)}", file=sys.stderr)
+        return False
 
-        # Verify input file
-        if not os.path.exists(config["audio_path"]):
-            raise FileNotFoundError(f"Audio file {config['audio_path']} not found!")
-
-        # Download model
-        os.makedirs("pretrained", exist_ok=True)
-        model_path = "pretrained/model.pth"
-        
-        if not os.path.exists(model_path):
-            print("Downloading model...")
-            import urllib.request
-            urllib.request.urlretrieve(config["model_url"], model_path)
-
-        # Initialize
+def main():
+    # Configuration
+    config = {
+        "model_url": "https://github.com/interactiveaudiolab/ppgs/releases/download/v1.0/model.pth",
+        "audio_path": "sample.wav",
+        "output_dir": "results"
+    }
+    
+    # Verify input file
+    if not check_audio_file(config["audio_path"]):
+        return 1
+    
+    # Prepare model
+    os.makedirs("pretrained", exist_ok=True)
+    model_path = "pretrained/model.pth"
+    
+    if not os.path.exists(model_path) and not download_model(config["model_url"], model_path):
+        return 1
+    
+    try:
+        # Initialize extractor
         print("Initializing PPG extractor...")
         extractor = PPGExtractor(
             model_path=model_path,
             device='cpu'
         )
-
-        # Process
-        print("Processing audio...")
+        
+        # Process audio
+        print("Processing audio file...")
         ppgs = extractor.extract(config["audio_path"])
         
         # Save results
         os.makedirs(config["output_dir"], exist_ok=True)
-        output_path = f"{config['output_dir']}/ppgs.npy"
-        np.save(output_path, ppgs)
-        print(f"Saved results to {output_path}")
+        np.save(f"{config['output_dir']}/ppgs.npy", ppgs)
         
-        # Visualization
+        # Create visualization
         plt.figure(figsize=(15,5))
         plt.imshow(ppgs.T, aspect='auto', origin='lower', cmap='viridis')
         plt.colorbar()
-        plot_path = f"{config['output_dir']}/ppgs_plot.png"
-        plt.savefig(plot_path)
-        print(f"Saved visualization to {plot_path}")
+        plt.savefig(f"{config['output_dir']}/ppgs_plot.png")
         
+        print("Analysis completed successfully!")
         return 0
         
     except Exception as e:
-        print(f"Error: {str(e)}", file=sys.stderr)
+        print(f"Error during analysis: {str(e)}", file=sys.stderr)
         return 1
 
 if __name__ == "__main__":

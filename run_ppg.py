@@ -1,13 +1,18 @@
 import os
 import sys
 import torch
-print(f"PyTorch version: {torch.__version__}")  # Debug output
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Проверка версий
+print(f"PyTorch: {torch.__version__}")
+print(f"NumPy: {np.__version__}")
 
 try:
     from ppgs import PPGExtractor
+    print("PPGExtractor imported successfully")
 except ImportError as e:
     print(f"ImportError: {str(e)}", file=sys.stderr)
-    print("PYTHONPATH:", os.environ.get('PYTHONPATH', ''), file=sys.stderr)
     sys.exit(1)
 
 def main():

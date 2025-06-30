@@ -1,6 +1,6 @@
 name: PPG Voice Analysis
 
-on: [workflow_dispatch]  # Запуск вручную
+on: [workflow_dispatch]
 
 jobs:
   analyze:
@@ -25,9 +25,9 @@ jobs:
     
     - name: Run analysis
       run: python run_ppg.py
-    
+      
     - name: Upload results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ppg-results
         path: results/

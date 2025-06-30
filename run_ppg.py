@@ -4,16 +4,25 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Проверка версий
+# Debug info
 print(f"PyTorch: {torch.__version__}")
 print(f"NumPy: {np.__version__}")
 
+# Try multiple import options
 try:
-    from ppgs import PPGExtractor
-    print("PPGExtractor imported successfully")
-except ImportError as e:
-    print(f"ImportError: {str(e)}", file=sys.stderr)
-    sys.exit(1)
+    from ppgs.model import PPGExtractor  # Новый путь
+    print("Imported PPGExtractor from ppgs.model")
+except ImportError:
+    try:
+        from ppgs import PPGExtractor  # Старый путь
+        print("Imported PPGExtractor from ppgs")
+    except ImportError:
+        try:
+            from ppgs.extract import Extractor as PPGExtractor  # Альтернативное имя
+            print("Imported Extractor as PPGExtractor")
+        except ImportError as e:
+            print(f"Failed to import PPGExtractor: {str(e)}")
+            sys.exit(1)
 
 def main():
     try:

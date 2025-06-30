@@ -25,7 +25,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install "numpy<2" "matplotlib<3.8" "librosa==0.10.0"
         pip install torch==2.1.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cpu
-        git clone --depth 1 --branch main https://github.com/interactiveaudiolab/ppgs.git
+        
+        # Клонирование с явным указанием ветки master
+        git clone --depth 1 --branch master https://github.com/interactiveaudiolab/ppgs.git
         cd ppgs
         pip install -e .
         cd ..
@@ -34,6 +36,7 @@ jobs:
     - name: Verify installations
       run: |
         python -c "import torch; print(f'PyTorch: {torch.__version__}')"
+        python -c "import numpy; print(f'NumPy: {numpy.__version__}')"
         python -c "from ppgs import PPGExtractor; print('PPGExtractor imported successfully')"
         
     - name: Run analysis

@@ -1,0 +1,33 @@
+name: PPG Voice Analysis
+
+on: [workflow_dispatch]  # Запуск вручную
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libsox-fmt-mp3 sox
+        pip install torch torchaudio librosa matplotlib numpy
+        git clone https://github.com/interactiveaudiolab/ppgs.git
+        cd ppgs && pip install -r requirements.txt && cd ..
+        export PYTHONPATH=$PYTHONPATH:$(pwd)/ppgs
+    
+    - name: Run analysis
+      run: python run_ppg.py
+    
+    - name: Upload results
+      uses: actions/upload-artifact@v3
+      with:
+        name: ppg-results
+        path: results/
